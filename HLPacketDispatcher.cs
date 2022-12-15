@@ -13,11 +13,41 @@ namespace MTUDPDispatcher
         {
             dynamic pk = new ExpandoObject();
             var ms = new MemoryStream(p.packetData);
-            pk.serialization = (byte)ms.ReadByte();
+            pk.serialization = ms.readByte();
             pk.networkCompression = ms.readUShort();
             pk.minProtocol = ms.readUShort();
             pk.maxProtocol = ms.readUShort();
             pk.username = ms.readString();
+
+            return pk;
+        }
+
+        public static dynamic SRP_BYTES_A(HLPacket p)
+        {
+            dynamic pk = new ExpandoObject();
+            var ms = new MemoryStream(p.packetData);
+            pk.bytes = ms.readString();
+            pk.currentLogin = ms.readByte();
+
+            return pk;
+        }
+
+        public static dynamic SRP_BYTES_M(HLPacket p)
+        {
+            dynamic pk = new ExpandoObject();
+            var ms = new MemoryStream(p.packetData);
+            pk.bytes = ms.readString();
+
+            return pk;
+        }
+
+        public static dynamic FIRST_SRP(HLPacket p)
+        {
+            dynamic pk = new ExpandoObject();
+            var ms = new MemoryStream(p.packetData);
+            pk.salt = ms.readString();
+            pk.key = ms.readString();
+            pk.is_empty = ms.readBool();
 
             return pk;
         }

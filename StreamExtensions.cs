@@ -63,6 +63,12 @@ namespace MTUDPDispatcher
             return Encoding.UTF8.GetString(buff);
         }
 
+        public static byte readByte(this Stream ms)
+        {
+            var val = (byte)ms.ReadByte();
+            return val;
+        }
+
         public static void writeLong(this Stream ms, long l)
         {
             var val = BitConverter.GetBytes(l);
@@ -74,6 +80,11 @@ namespace MTUDPDispatcher
             ms.Write(R(val));
         }
         public static void writeUInt(this Stream ms, uint l)
+        {
+            var val = BitConverter.GetBytes(l);
+            ms.Write(R(val));
+        }
+        public static void writeULong(this Stream ms, ulong l)
         {
             var val = BitConverter.GetBytes(l);
             ms.Write(R(val));
@@ -105,6 +116,14 @@ namespace MTUDPDispatcher
             ms.Write(valLen);
             ms.Write(bytes);
         }
+
+        public static void writeString(this Stream ms, byte[] l)
+        {
+            var valLen = R(BitConverter.GetBytes((ushort)l.Length));
+            ms.Write(valLen);
+            ms.Write(l);
+        }
+
         public static void writeBool(this Stream ms, bool l)
         {
             ms.Write((l ? new byte[] { 0x01 } : new byte[] { 0x00 }));

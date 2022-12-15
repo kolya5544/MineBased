@@ -23,11 +23,11 @@ namespace MTUDPDispatcher
                 byte[] peerId = new byte[2];
                 ms.Read(peerId);
                 ushort peer = BitConverter.ToUInt16(R(peerId));
-                byte channel = (byte)ms.ReadByte();
+                byte channel = ms.readByte();
 
                 bool reliable = false;
                 ushort seqNum = 0;
-                byte pType = (byte)ms.ReadByte();
+                byte pType = ms.readByte();
 
                 var packet = new Packet();
                 packet.peerId = peer;
@@ -39,7 +39,7 @@ namespace MTUDPDispatcher
                     byte[] buffer = new byte[sizeof(ushort)];
                     ms.Read(buffer);
                     seqNum = BitConverter.ToUInt16(R(buffer));
-                    pType = (byte)ms.ReadByte();
+                    pType = ms.readByte();
                 }
 
                 packet.reliable = reliable;
@@ -47,7 +47,7 @@ namespace MTUDPDispatcher
 
                 if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_CONTROL)
                 {
-                    packet.control_type = (byte)ms.ReadByte();
+                    packet.control_type = ms.readByte();
                     if (packet.controlType == LLPacketDispatcher.LLPacket_Control_Type.CONTROLTYPE_ACK ||
                         packet.controlType == LLPacketDispatcher.LLPacket_Control_Type.CONTROLTYPE_SET_PEER_ID)
                     {

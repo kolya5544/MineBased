@@ -29,7 +29,7 @@ namespace MTUDPDispatcher
         public static bool IsConnectionPacket(Packet p)
         {
             if (p is null) return false;
-            if (p.reliable == true && p.pType == LLPacketType.TYPE_ORIGINAL) return true;
+            if (p.reliable == true && p.pType == LLPacketType.TYPE_ORIGINAL && LLProtocolHandler.cmp(p.data, new byte[] { 0x00, 0x00 })) return true;
             return false;
         }
 

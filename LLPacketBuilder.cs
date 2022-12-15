@@ -72,6 +72,7 @@ namespace MTUDPDispatcher
             response.pType = LLPacketType.TYPE_CONTROL;
             response.controlType = LLPacket_Control_Type.CONTROLTYPE_ACK;
             response.control_data = prototype.reliable_seqNum;
+            response.channel = prototype.channel;
             response.origin = prototype.origin;
             return response;
         }
