@@ -47,6 +47,8 @@ namespace MTUDPDispatcher
         public ushort peerId;
         // second type (NOT reliable type)
         public byte packetType;
+        // channel
+        public byte channel;
         public LLPacketType pType
         {
             get
@@ -62,7 +64,6 @@ namespace MTUDPDispatcher
         public bool reliable = false;
         public ushort reliable_seqNum = 0;
         // is CONTROL?
-        public bool control = false;
         public byte control_type = 0;
         public LLPacket_Control_Type controlType
         {
@@ -77,9 +78,7 @@ namespace MTUDPDispatcher
         }
         public ushort control_data = 0;
         // is ORIGINAL?
-        public bool original = false;
         // is SPLIT?
-        public bool split = false;
         public ushort split_seqNum = 0;
         public ushort split_chunk_count = 0;
         public ushort split_chunk_num = 0;

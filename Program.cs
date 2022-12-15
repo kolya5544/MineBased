@@ -48,14 +48,22 @@ namespace MTUDPDispatcher
 
                     // from here, we begin working with High-Level Protocol.
                     // TODO: IMPLEMENT PROPER SPLIT SUPPORT (should it be in lower level or higher level? I don't know!)
+                    if (dispatched.reliable)
+                    {
+                        user.reliable_seqNum = dispatched.reliable_seqNum;
+                    }
                     var packet = HLProtocolHandler.DispatchData(dispatched.data);
                     Console.WriteLine($"Packet: {packet.pType}, length: {packet.packetData.Length}");
                     
                     if (packet.pType == HLProtocolHandler.HLPacketType.TOSERVER_INIT)
                     {
-                        var initPacket = HLPacketDispatcher.SERVER_INIT(packet);
+                        var initPacket = HLPacketDispatcher.INIT(packet);
                         Console.WriteLine($"user({user.peer_id})'s nickname is {initPacket.username}");
                         user.username = initPacket.username;
+
+                        // now we have to send a TOCLIENT_HELLO message to progress the handshake
+                        HLPacket hp = HLPacketBuilder.BuildHello(initPacket, true);
+                        udpServer.SendPacket(hp, user);
                     }
                 }
                 else
@@ -71,5 +79,6 @@ namespace MTUDPDispatcher
         public IPEndPoint endpoint;
         public ushort peer_id;
         public string username;
+        public ushort reliable_seqNum;
     }
 }

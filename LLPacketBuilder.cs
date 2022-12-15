@@ -16,14 +16,15 @@ namespace MTUDPDispatcher
             using (var ms = new MemoryStream())
             {
                 ms.Write(MagicPacket); // magic
-                if (packet.peerId != 0)
+                /*if (packet.peerId != 0)
                 {
                     ms.Write(R(BitConverter.GetBytes(packet.peerId))); // peer ID
                 } else
                 {
                     ms.Write(R(BitConverter.GetBytes((ushort)1)));
-                }
-                ms.WriteByte(0); // channel
+                }*/
+                ms.Write(R(BitConverter.GetBytes((ushort)1))); // peer ID is always 1 server-side.
+                ms.WriteByte(packet.channel); // channel
 
                 if (packet.reliable)
                 {

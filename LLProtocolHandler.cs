@@ -31,6 +31,7 @@ namespace MTUDPDispatcher
 
                 var packet = new Packet();
                 packet.peerId = peer;
+                packet.channel = channel;
 
                 if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_RELIABLE)
                 {
@@ -44,13 +45,8 @@ namespace MTUDPDispatcher
                 packet.reliable = reliable;
                 packet.reliable_seqNum = seqNum;
 
-                if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_ORIGINAL)
+                if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_CONTROL)
                 {
-                    packet.original = true;
-                }
-                else if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_CONTROL)
-                {
-                    packet.control = true;
                     packet.control_type = (byte)ms.ReadByte();
                     if (packet.controlType == LLPacketDispatcher.LLPacket_Control_Type.CONTROLTYPE_ACK ||
                         packet.controlType == LLPacketDispatcher.LLPacket_Control_Type.CONTROLTYPE_SET_PEER_ID)
@@ -62,7 +58,6 @@ namespace MTUDPDispatcher
                 }
                 else if (pType == (byte)LLPacketDispatcher.LLPacketType.TYPE_SPLIT)
                 {
-                    packet.split = true;
                     byte[] data = new byte[2];
                     ms.Read(data);
                     packet.split_seqNum = BitConverter.ToUInt16(R(data));

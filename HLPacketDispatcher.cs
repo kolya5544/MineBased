@@ -9,7 +9,7 @@ namespace MTUDPDispatcher
 {
     public class HLPacketDispatcher
     {
-        public static dynamic SERVER_INIT(HLPacket p)
+        public static dynamic INIT(HLPacket p)
         {
             dynamic pk = new ExpandoObject();
             var ms = new MemoryStream(p.packetData);

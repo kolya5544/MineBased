@@ -73,7 +73,17 @@ namespace MTUDPDispatcher
             var val = BitConverter.GetBytes(l);
             ms.Write(R(val));
         }
+        public static void writeUInt(this Stream ms, uint l)
+        {
+            var val = BitConverter.GetBytes(l);
+            ms.Write(R(val));
+        }
         public static void writeShort(this Stream ms, short l)
+        {
+            var val = BitConverter.GetBytes(l);
+            ms.Write(R(val));
+        }
+        public static void writeUShort(this Stream ms, ushort l)
         {
             var val = BitConverter.GetBytes(l);
             ms.Write(R(val));

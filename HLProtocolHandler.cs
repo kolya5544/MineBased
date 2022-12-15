@@ -12,7 +12,8 @@ namespace MTUDPDispatcher
     {
         public enum HLPacketType
         {
-            TOSERVER_INIT = 0x02
+            TOSERVER_INIT = 0x02,
+            TOCLIENT_HELLO = 0x02
         }
 
         public static HLPacket? DispatchData(byte[] packet)
@@ -51,5 +52,6 @@ namespace MTUDPDispatcher
         }
 
         public byte[] packetData;
+        public byte channel;
     }
 }
