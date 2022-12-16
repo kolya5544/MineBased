@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTUDPDispatcher", "MTUDPDispatcher.csproj", "{B9E52A45-3E47-4E60-9391-A9F144D90B7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTUDPDispatcher", "MTUDPDispatcher.csproj", "{B9E52A45-3E47-4E60-9391-A9F144D90B7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "srp", "..\srplib\srp.csproj", "{420B26E7-29B9-46F9-A784-975A821C451F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B9E52A45-3E47-4E60-9391-A9F144D90B7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9E52A45-3E47-4E60-9391-A9F144D90B7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9E52A45-3E47-4E60-9391-A9F144D90B7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{420B26E7-29B9-46F9-A784-975A821C451F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{420B26E7-29B9-46F9-A784-975A821C451F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{420B26E7-29B9-46F9-A784-975A821C451F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{420B26E7-29B9-46F9-A784-975A821C451F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

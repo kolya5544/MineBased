@@ -39,6 +39,13 @@ namespace MTUDPDispatcher
             if (p.reliable == true) return true;
             return false;
         }
+
+        public static bool IsReplyToAReliable(Packet p)
+        {
+            if (p is null) return false;
+            if (p.pType == LLPacketType.TYPE_CONTROL && p.controlType == LLPacket_Control_Type.CONTROLTYPE_ACK) return true;
+            return false;
+        }
     }
 
     public class Packet

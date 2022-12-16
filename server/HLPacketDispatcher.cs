@@ -26,7 +26,7 @@ namespace MTUDPDispatcher
         {
             dynamic pk = new ExpandoObject();
             var ms = new MemoryStream(p.packetData);
-            pk.bytes = ms.readString();
+            pk.bytes = ms.readByteString();
             pk.currentLogin = ms.readByte();
 
             return pk;
@@ -36,7 +36,7 @@ namespace MTUDPDispatcher
         {
             dynamic pk = new ExpandoObject();
             var ms = new MemoryStream(p.packetData);
-            pk.bytes = ms.readString();
+            pk.bytes = ms.readByteString();
 
             return pk;
         }
@@ -45,8 +45,8 @@ namespace MTUDPDispatcher
         {
             dynamic pk = new ExpandoObject();
             var ms = new MemoryStream(p.packetData);
-            pk.salt = ms.readString();
-            pk.key = ms.readString();
+            pk.salt = ms.readByteString();
+            pk.key = ms.readByteString();
             pk.is_empty = ms.readBool();
 
             return pk;

@@ -69,6 +69,16 @@ namespace MTUDPDispatcher
             return val;
         }
 
+        public static byte[] readByteString(this Stream ms)
+        {
+            var z = new byte[2];
+            ms.Read(z);
+            var len = BitConverter.ToUInt16(R(z));
+            var buff = new byte[len];
+            ms.Read(buff);
+            return buff;
+        }
+
         public static void writeLong(this Stream ms, long l)
         {
             var val = BitConverter.GetBytes(l);
@@ -117,7 +127,7 @@ namespace MTUDPDispatcher
             ms.Write(bytes);
         }
 
-        public static void writeString(this Stream ms, byte[] l)
+        public static void writeByteString(this Stream ms, byte[] l)
         {
             var valLen = R(BitConverter.GetBytes((ushort)l.Length));
             ms.Write(valLen);

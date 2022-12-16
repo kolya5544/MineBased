@@ -25,16 +25,16 @@ namespace MTUDPDispatcher
 
         // stage 1
         public string username;
-        public string received_Public;
+        public byte[] received_Public;
         public SrpServer srp;
         public SrpEphemeral s_emph;
         public RegisteredUser ru;
 
         // stage 2
-        public string salt;
-        public string newPublic;
+        public byte[] salt;
+        public byte[] newPublic;
 
-        public static SRPManager GotBytesA(string username, string receivedBytes)
+        public static SRPManager GotBytesA(string username, byte[] receivedBytes)
         {
             var manager = new SRPManager();
             var prm = SrpParameters.Create2048<SHA256>();
@@ -44,15 +44,15 @@ namespace MTUDPDispatcher
             var user = db.users.FirstOrDefault((z) => z.username == username);
             manager.ru = user;
 
-            var serverEphemeral = manager.srp.GenerateEphemeral(hexify(Encoding.UTF8.GetBytes(user.verifier)));
+            var serverEphemeral = manager.srp.GenerateEphemeral(user.verifier);
             manager.s_emph = serverEphemeral;
             manager.salt = user.salt;
-            manager.newPublic = Encoding.UTF8.GetString(hexBytes(serverEphemeral.Public));
+            manager.newPublic = serverEphemeral.Public;
             manager.phase = AuthPhase.GOT_BYTES_A;
             return manager;
         }
 
-        public static string GotBytesM(string clientVerifier, SRPManager m)
+        public static string GotBytesM(byte[] clientVerifier, SRPManager m)
         {
             var serverSession = m.srp.DeriveSession(m.s_emph.Secret, m.received_Public, m.ru.salt, m.username, m.ru.verifier, clientVerifier);
             m.phase = AuthPhase.GOT_BYTES_M;

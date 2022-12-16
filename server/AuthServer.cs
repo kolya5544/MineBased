@@ -38,7 +38,7 @@ namespace MTUDPDispatcher
     public class RegisteredUser
     {
         public string username;
-        public string verifier;
-        public string salt;
+        public byte[] verifier;
+        public byte[] salt;
     }
 }
