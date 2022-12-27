@@ -50,6 +50,6 @@
 		/// <param name="clientPublicEphemeral">The client public ephemeral.</param>
 		/// <param name="clientSession">The client session.</param>
 		/// <param name="serverSessionProof">The server session proof.</param>
-		void VerifySession(string clientPublicEphemeral, SrpSession clientSession, string serverSessionProof);
+		void VerifySession(byte[] clientPublicEphemeral, SrpSession clientSession, byte[] serverSessionProof);
 	}
 }

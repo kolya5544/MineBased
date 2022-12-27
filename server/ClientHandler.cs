@@ -40,10 +40,13 @@ namespace MTUDPDispatcher
 
             if (LLPacketDispatcher.IsReplyToAReliable(dispatched))
             {
-                // we got a reply - deleting a packet from the queue.
-                HLPacketBuilder.queue.RemoveAll((z) => z.peerId == dispatched.peerId && z.seqNum == dispatched.control_data);
-                // checking if there are any packets we lost
-                HLPacketBuilder.queue.ForEach((z) => { if (z.sent + 2000 < UnixMS()) { z.Resend(); } });
+                lock (HLPacketBuilder.queue)
+                {
+                    // we got a reply - deleting a packet from the queue.
+                    HLPacketBuilder.queue.RemoveAll((z) => z.peerId == dispatched.peerId && z.seqNum == dispatched.control_data);
+                    // checking if there are any packets we lost
+                    HLPacketBuilder.queue.ForEach((z) => { if (z.sent + 2000 < UnixMS()) { z.Resend(); } });
+                }
             }
 
             if (dispatched.controlType == LLPacketDispatcher.LLPacket_Control_Type.CONTROLTYPE_DISCO &&
@@ -97,8 +100,12 @@ namespace MTUDPDispatcher
                     Console.WriteLine($"user({user.peer_id})'s nickname is {initPacket.username}");
 
                     // now we have to send a TOCLIENT_HELLO message to progress the handshake
-                    HLPacket hp = HLPacketBuilder.BuildHello(initPacket, db.users.Exists((z) => z.username.ToLower() == user.username.ToLower()));
-                    udpServer.SendPacket(hp, user);
+                    lock (db.users)
+                    {
+                        var registered = db.users.Exists((z) => z.username.ToLower() == user.username.ToLower());
+                        HLPacket hp = HLPacketBuilder.BuildHello(initPacket, registered);
+                        udpServer.SendPacket(hp, user);
+                    }
                 }
                 if (packet.pType == HLProtocolHandler.HLPacketType.TOSERVER_SRP_BYTES_A && !user.isAuthed) // auth begins
                 {
@@ -116,8 +123,15 @@ namespace MTUDPDispatcher
                     var authMPacket = HLPacketDispatcher.SRP_BYTES_M(packet);
                     Console.WriteLine($"got M bytes from user({user.peer_id})");
 
-                    // now we have to send our proof (M2)
-                    // actually nevermind
+                    // now we have to see our proof
+                    var verif = SRPManager.GotBytesM(authMPacket.bytes, user.auth);
+                    if (user.auth.phase == SRPManager.AuthPhase.FAILED_AUTH)
+                    {
+                        var pk = HLPacketBuilder.BuildAccessDenied(HLProtocolHandler.HLFailureReason.SERVER_ACCESSDENIED_WRONG_PASSWORD);
+                        Disconnect(user);
+                        udpServer.SendPacket(pk, user); return;
+                    }
+
                     // if everything is good, just let the person in.
                     user.auth.phase = SRPManager.AuthPhase.SUCCESS_AUTH;
                     var authAccept = HLPacketBuilder.BuildAuthAccept();
@@ -139,11 +153,17 @@ namespace MTUDPDispatcher
                         Disconnect(user);
                         udpServer.SendPacket(pk, user); return;
                     }
-                    if (db.users.Exists((z) => z.username == user.username))
+                    lock (db.users)
                     {
-
+                        if (db.users.Exists((z) => z.username == user.username))
+                        {
+                            var pk = HLPacketBuilder.BuildAccessDenied(HLProtocolHandler.HLFailureReason.SERVER_ACCESSDENIED_WRONG_NAME, "This username is already registered!");
+                            Disconnect(user);
+                            udpServer.SendPacket(pk, user); return;
+                        }
+                        db.users.Add(new RegisteredUser() { username = user.username, salt = registerPacket.salt, verifier = registerPacket.key });
+                        db.SaveDatabase("db.json");
                     }
-                    db.users.Add(new RegisteredUser() { username = user.username, salt = registerPacket.salt, verifier = registerPacket.key });
 
                     user.auth = new SRPManager();
                     user.auth.phase = SRPManager.AuthPhase.SUCCESS_AUTH;

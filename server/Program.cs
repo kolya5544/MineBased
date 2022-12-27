@@ -53,6 +53,7 @@ namespace MTUDPDispatcher
         public ushort peer_id;
         public string username;
         public ushort reliable_seqNum = 65500;
+        public ushort chunked_seqNum = 65500;
         public SRPManager auth;
         public bool isAuthed
         {

@@ -41,22 +41,33 @@ namespace MTUDPDispatcher
             manager.srp = new SrpServer(prm);
             manager.received_Public = receivedBytes;
 
-            var user = db.users.FirstOrDefault((z) => z.username == username);
-            manager.ru = user;
-
-            var serverEphemeral = manager.srp.GenerateEphemeral(user.verifier);
-            manager.s_emph = serverEphemeral;
-            manager.salt = user.salt;
-            manager.newPublic = serverEphemeral.Public;
+            lock (db.users)
+            {
+                var user = db.users.FirstOrDefault((z) => z.username == username);
+                manager.ru = user;
+                manager.salt = user.salt;
+                var serverEphemeral = manager.srp.GenerateEphemeral(user.verifier);
+                manager.s_emph = serverEphemeral;
+                manager.newPublic = serverEphemeral.Public;
+            }
+            manager.username = username;
             manager.phase = AuthPhase.GOT_BYTES_A;
+           
             return manager;
         }
 
-        public static string GotBytesM(byte[] clientVerifier, SRPManager m)
+        public static byte[] GotBytesM(byte[] clientVerifier, SRPManager m)
         {
-            var serverSession = m.srp.DeriveSession(m.s_emph.Secret, m.received_Public, m.ru.salt, m.username, m.ru.verifier, clientVerifier);
-            m.phase = AuthPhase.GOT_BYTES_M;
-            return serverSession.Proof;
+            try
+            {
+                var serverSession = m.srp.DeriveSession(m.s_emph.Secret, m.received_Public, m.ru.salt, m.username, m.ru.verifier, clientVerifier);
+                m.phase = AuthPhase.GOT_BYTES_M;
+                return serverSession.Proof;
+            } catch
+            {
+                m.phase = AuthPhase.FAILED_AUTH;
+            }
+            return null;
         }
 
         public static byte[] hexBytes(string hexString)

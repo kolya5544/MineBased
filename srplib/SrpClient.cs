@@ -198,8 +198,8 @@ namespace SecureRemotePassword
 
 			return new SrpSession
 			{
-				Key = K.ToHex(),
-				Proof = M1.ToHex(),
+				Key = K.ToByteArray(),
+				Proof = M1.ToByteArray(),
 			};
 		}
 
@@ -209,7 +209,7 @@ namespace SecureRemotePassword
 		/// <param name="clientPublicEphemeral">The client public ephemeral.</param>
 		/// <param name="clientSession">The client session.</param>
 		/// <param name="serverSessionProof">The server session proof.</param>
-		public void VerifySession(string clientPublicEphemeral, SrpSession clientSession, string serverSessionProof)
+		public void VerifySession(byte[] clientPublicEphemeral, SrpSession clientSession, byte[] serverSessionProof)
 		{
 			// H — One-way hash function
 			var H = Parameters.Hash;
@@ -217,13 +217,13 @@ namespace SecureRemotePassword
 			// A — Public ephemeral values
 			// M — Proof of K
 			// K — Shared, strong session key
-			var A = SrpInteger.FromHex(clientPublicEphemeral);
-			var M = SrpInteger.FromHex(clientSession.Proof);
-			var K = SrpInteger.FromHex(clientSession.Key);
+			var A = SrpInteger.FromByteArray(clientPublicEphemeral);
+			var M = SrpInteger.FromByteArray(clientSession.Proof);
+			var K = SrpInteger.FromByteArray(clientSession.Key);
 
 			// H(A, M, K)
 			var expected = H(A, M, K);
-			var actual = SrpInteger.FromHex(serverSessionProof);
+			var actual = SrpInteger.FromByteArray(serverSessionProof);
 
 			if (actual != expected)
 			{

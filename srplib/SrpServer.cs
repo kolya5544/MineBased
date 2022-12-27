@@ -143,8 +143,8 @@ namespace SecureRemotePassword
 
 			return new SrpSession
 			{
-				Key = K.ToHex(),
-				Proof = P.ToHex(),
+				Key = K.ToByteArray(),
+				Proof = P.ToByteArray(),
 			};
 		}
 	}

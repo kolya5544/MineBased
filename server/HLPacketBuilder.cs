@@ -76,24 +76,83 @@ namespace MTUDPDispatcher
             }
         }
 
+        public static int chunksize_max = 500;
+        public static List<Packet> SplitChunkedPacket(HLPacket packet, PlayerClient user, ushort seqNum, UdpClient client)
+        {
+            var count = packet.packetData.Length / chunksize_max;
+            count = (packet.packetData.Length % chunksize_max == 0 ? count : count + 1);
+            List<Packet> p = new List<Packet>();
+            var dMs = new MemoryStream(packet.packetData);
+            for (int i = 0; i < count; i++)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var newP = new Packet();
+                    newP.peerId = user.peer_id;
+                    newP.reliable = true;
+                    newP.pType = LLPacketDispatcher.LLPacketType.TYPE_SPLIT;
+                    ms.writeUShort(packet.packetType);
+                    var bfr = new byte[chunksize_max]; var rd = dMs.Read(bfr);
+                    if (rd != chunksize_max)
+                    {
+                        var nbfr = new byte[rd]; Array.Copy(bfr, nbfr, rd);
+                        //newP.data = nbfr;
+                        ms.Write(nbfr);
+                    }
+                    else
+                    {
+                        //newP.data = bfr;
+                        ms.Write(bfr);
+                    }
+                    newP.data = ms.ToArray();
+                    newP.origin = user.endpoint;
+                    newP.channel = packet.channel;
+
+                    newP.split_seqNum = seqNum;
+                    newP.split_chunk_count = (ushort)count;
+                    newP.split_chunk_num = (ushort)i;
+                    /*client.SendPacket(newP);
+                    lock (queue)
+                    {
+                        queue.Add(new PacketQueue() { packet = newP, client = client, seqNum = newP.reliable_seqNum, peerId = user.peer_id });
+                    }*/
+                    p.Add(newP);
+                }
+            }
+            return p;
+        }
+
         public static void SendPacket(this UdpClient client, HLPacket packet, PlayerClient user)
         {
-            Console.WriteLine($">> Packet: {packet.pType}, length: {packet.packetData.Length}");
-            using (var ms = new MemoryStream())
+            byte[] packetData = packet.packetData;
+            if (packetData.Length <= chunksize_max)
             {
-                var p = new Packet();
-                p.peerId = user.peer_id;
-                p.reliable = true;
-                p.reliable_seqNum = (ushort)(user.reliable_seqNum);
-                user.reliable_seqNum += 1;
-                p.pType = LLPacketDispatcher.LLPacketType.TYPE_ORIGINAL;
-                ms.writeUShort(packet.packetType);
-                ms.Write(packet.packetData);
-                p.data = ms.ToArray();
-                p.origin = user.endpoint;
-                p.channel = packet.channel;
-                client.SendPacket(p);
-                queue.Add(new PacketQueue() { packet = p, client = client, seqNum = p.reliable_seqNum, peerId = user.peer_id });
+                Console.WriteLine($">> Packet: {packet.pType}, length: {packet.packetData.Length}");
+                using (var ms = new MemoryStream())
+                {
+                    var p = new Packet();
+                    p.peerId = user.peer_id;
+                    p.reliable = true;
+                    p.reliable_seqNum = (ushort)(user.reliable_seqNum);
+                    user.reliable_seqNum += 1;
+                    p.pType = LLPacketDispatcher.LLPacketType.TYPE_ORIGINAL;
+                    ms.writeUShort(packet.packetType);
+                    ms.Write(packetData);
+                    p.data = ms.ToArray();
+                    p.origin = user.endpoint;
+                    p.channel = packet.channel;
+                    client.SendPacket(p);
+                    lock (queue)
+                    {
+                        queue.Add(new PacketQueue() { packet = p, client = client, seqNum = p.reliable_seqNum, peerId = user.peer_id });
+                    }
+                }
+            } else
+            {
+                var split = SplitChunkedPacket(packet, user, user.chunked_seqNum, client);
+                Console.WriteLine($">> Split Packet: {packet.pType}, length: {packet.packetData.Length} (a total of {split.Count} packets)");
+                split.ForEach((z) => client.SendPacket(z));
+                user.chunked_seqNum += 1;
             }
         }
     }
